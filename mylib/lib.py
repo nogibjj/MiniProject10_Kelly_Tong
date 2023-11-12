@@ -43,17 +43,21 @@ def describe(dataset):
     return description
 
 def transform_origin(dataset):
-    origin_conditions = [
-        (col("Origin") == "US"),
-        (col("Origin") == "Europe"),
-        (col("Origin") == "Japan")
+    major_conditions = [
+        (col("Major_category") == "Engineering"),
+        (col("Major_category") == "Physical Sciences"),
+        (col("Major_category") == "Computers & Mathematics"),
+        (col("Major_category") == "Health"),
+        (col("Major_category") == "Biology & Life Science")
     ]
-    origin_categories = ["Domestic", "European", "Japanese"]
+    major_categories = ["Engineering", "Physical Sciences", "Computers & Mathematics", "Health", "Biology & Life Science"]
     transformed_dataset = dataset.withColumn("RegionCategory", when(
-        origin_conditions[0], origin_categories[0]
-        ).when(origin_conditions[1], origin_categories[1]
-        ).when(origin_conditions[2], origin_categories[2]
-        ).otherwise("Imported"))
+        major_conditions[0], major_categories[0]
+        ).when(major_conditions[1], major_categories[1]
+        ).when(major_conditions[2], major_categories[2]
+        ).when(major_conditions[3], major_categories[3]
+        ).when(major_conditions[4], major_categories[4]
+        ).otherwise("Other Majors"))
     append_to_report("Data Transformation", 
                      transformed_dataset.limit(10).toPandas().to_markdown())
     return transformed_dataset
