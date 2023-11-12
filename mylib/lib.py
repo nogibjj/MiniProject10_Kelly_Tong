@@ -50,7 +50,8 @@ def transform_origin(dataset):
         (col("Major_category") == "Health"),
         (col("Major_category") == "Biology & Life Science")
     ]
-    major_categories = ["Engineering", "Physical Sciences", "Computers & Mathematics", "Health", "Biology & Life Science"]
+    major_categories = ["Engineering", "Physical Sciences", "Computers & Mathematics", 
+                        "Health", "Biology & Life Science"]
     transformed_dataset = dataset.withColumn("RegionCategory", when(
         major_conditions[0], major_categories[0]
         ).when(major_conditions[1], major_categories[1]
