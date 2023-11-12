@@ -1,54 +1,42 @@
-"""handles cli commands"""
-import sys
-import argparse
-from mylib.extract import extract
-from mylib.transform_load import load
-from mylib.query import (
-    general_query,
+"""
+Main application entry point for PySpark data processing
+"""
+from mylib.lib import (
+    initiate_spark_session,
+    read_dataset,
+    describe,
+    transform_origin,
+    append_to_report,
 )
 
 
-def handle_arguments(args):
-    """add action based on inital calls"""
-    parser = argparse.ArgumentParser(description="ETL-Query script")
-    parser.add_argument(
-        "action",
-        choices=[
-            "extract",
-            "transform_load",
-            "update_record",
-            "delete_record",
-            "create_record",
-            "general_query",
-            "read_data",
-        ],
+def run_data_analysis():
+    spark = initiate_spark_session("Women Data Analysis")
+
+    data_file_path = "data/women_stem.csv"
+    women_data = read_dataset(spark, data_file_path)
+    description_data = describe(women_data)
+    description_data.createOrReplaceTempView("description_view")
+    transformed_data = transform_origin(women_data)
+    transformed_data.createOrReplaceTempView("women_data_view")
+    query_result = spark.sql(
+        """
+        SELECT Women, COUNT(*) AS TotalWomen
+        FROM women_data_view
+        GROUP BY Major_category
+        ORDER BY TotalWomen DESC
+    """
     )
-    args = parser.parse_args(args[:1])
-    print(args.action)
 
-    if args.action == "general_query":
-        parser.add_argument("query")
+    query_result.show()
+    append_to_report(
+        "Spark SQL Query Result", query_result.limit(10).toPandas().to_markdown()
+    )
 
-    # parse again with ever
-    return parser.parse_args(sys.argv[1:])
+    # query_result.write.format("csv").save("output/query_result.csv")
 
-
-def main():
-    """handles all the cli commands"""
-    args = handle_arguments(sys.argv[1:])
-
-    if args.action == "extract":
-        print("Extracting data...")
-        extract()
-    elif args.action == "transform_load":
-        print("Transforming data...")
-        load()
-    elif args.action == "general_query":
-        general_query(args.query)
-
-    else:
-        print(f"Unknown action: {args.action}")
+    spark.stop()
 
 
 if __name__ == "__main__":
-    main()
+    run_data_analysis()
