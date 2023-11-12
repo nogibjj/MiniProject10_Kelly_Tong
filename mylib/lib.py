@@ -3,7 +3,6 @@ from pyspark.sql.functions import col, when
 from pyspark.sql.types import (
     StructType, 
     StructField, 
-    FloatType, 
     IntegerType, 
     StringType)
 
