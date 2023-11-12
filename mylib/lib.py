@@ -22,19 +22,18 @@ def initiate_spark_session(app_title):
     return session
 
 def read_dataset(spark, dataset_path):
-    car_schema = StructType([
-        StructField("Car", StringType(), True),  
-        StructField("MPG", FloatType(), True),  
-        StructField("Cylinders", IntegerType(), True),  
-        StructField("Displacement", FloatType(), True),  
-        StructField("Horsepower", FloatType(), True),  
-        StructField("Weight", FloatType(), True), 
-        StructField("Acceleration", FloatType(), True), 
-        StructField("Model", IntegerType(), True),  
-        StructField("Origin", StringType(), True),  
+    women_schema = StructType([
+        StructField("Rank", IntegerType(), True),  
+        StructField("Major", StringType(), True),  
+        StructField("Major_category", StringType(), True),  
+        StructField("Total", IntegerType(), True),  
+        StructField("Men", IntegerType(), True),  
+        StructField("Women", IntegerType(), True), 
+        StructField("ShareWomen", IntegerType(), True), 
+        StructField("Median", IntegerType(), True),  
     ])
     dataset = spark.read.option("header", 
-    "true").option("sep", ";").schema(car_schema).csv(dataset_path)
+    "true").option("sep", ";").schema(women_schema).csv(dataset_path)
     append_to_report("Data Loading", dataset.limit(10).toPandas().to_markdown()) 
     return dataset
 
