@@ -75,3 +75,7 @@ The building process starts with installing the packages.
 
 <img width="299" alt="make format" src="https://github.com/Kelly0604/miniproject2/assets/142815940/41df08ca-d8f7-4b62-b88b-1f39f1a7d858">
 
+
+
+## Output
+Output from the query is summarized in [analysis report](https://github.com/nogibjj/MiniProject10_Kelly_Tong/blob/ede0c256655402f842a464f79432dac66e934293/analysis_report.md)
