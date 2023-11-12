@@ -1,56 +1,49 @@
 """
-Test goes here
-
+PySpark Application Test Suite for Car Data
 """
-
-import subprocess
-
-
-def test_extract():
-    """tests extract()"""
-    result = subprocess.run(
-        ["python", "main.py", "extract"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    assert result.returncode == 0
-    assert "Extracting data..." in result.stdout
+from pyspark.sql.session import SparkSession
+import pytest
+from mylib.lib import (
+    initiate_spark_session,
+    read_dataset,
+    describe,
+    transform_origin,
+)
 
 
-def test_transform_load():
-    """tests transfrom_load"""
-    result = subprocess.run(
-        ["python", "main.py", "transform_load"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    assert result.returncode == 0
-    assert "Transforming data..." in result.stdout
+@pytest.fixture(scope="session")
+def spark_session():
+
+    session = initiate_spark_session("TestWomenDataProcessing")
+    yield session
+    session.stop()
 
 
-def test_general_query():
-    """tests general_query"""
-    result = subprocess.run(
-        [
-            "python",
-            "main.py",
-            "general_query",
-            """SELECT Major, SUM(Total) as SumTotal, SUM(Women) as SumWomen 
-            FROM women_stemDB 
-            GROUP BY Major 
-            ORDER BY SumTotal DESC 
-            LIMIT 10""",
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    assert result.returncode == 0
+def test_data_loading(spark_session: SparkSession):
+    data_path = "data/women_stem.csv"
+    women_df = read_dataset(spark_session, data_path)
+    assert women_df is not None and women_df.count() > 0
+
+
+def test_data_describe(spark_session: SparkSession):
+    women_df = read_dataset(spark_session, "data/women_stem.csv")
+    description_data = describe(women_df)
+    assert description_data is not None
+
+
+def test_data_transform(spark_session: SparkSession):
+    women_df = read_dataset(spark_session, "data/women_stem.csv")
+    transformed_women_df = transform_origin(women_df)
+    assert transformed_women_df is not None
+    assert "Major_category" in transformed_women_df.columns
+
+
+def run_tests():
+    session = spark_session()
+    test_data_loading(session)
+    test_data_loading(session)
+    test_data_transform(session)
 
 
 if __name__ == "__main__":
-    test_extract()
-    test_transform_load()
-    test_general_query()
+    run_tests()
